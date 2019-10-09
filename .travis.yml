@@ -1,0 +1,31 @@
+language: cpp
+dist: xenial
+
+branches:
+  only:
+    - master
+
+env:
+  global:
+    # Ubuntu version
+    - DEPS_DIR=${TRAVIS_BUILD_DIR}/deps
+
+matrix:
+  include:
+    # Linux/gcc
+    # https://launchpad.net/~ubuntu-toolchain-r/+archive/ubuntu/test/+packages
+    - os: linux
+
+  fast_finish: true
+
+
+install:
+  - |
+    travis_retry sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    travis_retry sudo apt-get -qq update
+    travis_retry sudo apt-get -qy install qemu-user g++-arm-linux-gnueabihf
+
+script:
+  - |
+    pushd .build && cmake .. -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake && make
+    pushd app && qemu-arm -L /usr/arm-linux-gnueabihf ./hello-arm
